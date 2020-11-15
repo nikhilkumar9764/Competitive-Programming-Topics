@@ -1,0 +1,102 @@
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define MOD (ll) (1e9+7)
+ll blck_size;
+#define MAXN 10000
+#define SQRTSIZE 100
+ll ar[MAXN];
+vector<ll> block[SQRTSIZE];
+ll blck_sum[SQRTSIZE];
+ll lazy_add[SQRTSIZE];
+int query(ll l,ll r)
+{
+	ll lef = l-1;
+	ll rig = r-1;
+	ll ans= 0;
+	while(lef<=rig && lef!=0 && lef%blck_size!=0)
+	{
+		ans+=(ar[lef]+lazy_add[lef/blck_size]);
+		++lef;
+	}
+	while(lef+blck_size<=rig)
+	{
+		ans+=blck_sum[lef/blck_size]+(lazy_add[lef/blck_size]*block[lef/blck_size].size());
+		lef+=blck_size;
+	}
+	while(lef<=rig)
+	{
+		ans+=(ar[lef]+lazy_add[lef/blck_size]);
+		++lef;
+	}
+	return ans;
+}
+void update(ll l,ll r,ll x)
+{
+	ll lef = l-1;
+	ll rig = r-1;
+	while(lef<=rig && lef!=0 && lef%blck_size!=0)
+	{
+		ar[lef]+=x;
+		++lef;
+	}
+	while(lef+blck_size<=rig)
+	{
+		lazy_add[lef/blck_size]+=x;
+		lef+=blck_size;
+	}
+	while(lef<=rig)
+	{
+		ar[lef]+=x;
+		++lef;
+	}
+}
+void precompute(ll input[],ll n)
+{
+	blck_size = sqrt(n);
+	ll blck_id = -1;
+	ll su =0 ;
+	for(int i=0;i<n;i++)
+	{
+		if(i%blck_size == 0 && blck_id ==-1)
+		{
+			++blck_id;
+		}
+		else if(i%blck_size == 0 && blck_id >=-1)
+		{
+			blck_sum[blck_id] = su;
+			++blck_id;
+			su = 0;
+		}
+		su+=input[i];
+		block[blck_id].push_back(input[i]);
+	}
+}
+int main()
+{
+	ll n,q;
+	cin>>n>>q;
+	for(int i=0;i<n;i++)
+	{
+		cin>>ar[i];
+	}
+	precompute(ar,n);
+	while(q--)
+	{
+		ll ch;
+		cin>>ch;
+		if(ch == 1)
+		{
+			ll l,r,x;
+			cin>>l>>r>>x;
+			update(l,r,x);
+		}
+		else if(ch == 2)
+		{
+			ll l,r;
+			cin>>l>>r;
+            ll fi = query(l,r);
+            cout<<fi<<"\n";
+		}
+	}
+}

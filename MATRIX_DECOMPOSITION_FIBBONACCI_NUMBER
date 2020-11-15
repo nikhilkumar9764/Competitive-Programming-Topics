@@ -1,0 +1,46 @@
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long int;
+#define MOD (ll) (1e9+7)
+void multiply(ll A[2][2],ll M[2][2])
+{
+	ll fi = A[0][0] * M[0][0] + A[0][1] * M[1][0];
+	ll se = A[0][0] * M[0][1] + A[0][1] * M[1][1];
+	ll thi = A[1][0] * M[0][0] + A[1][1] * M[1][0];
+	ll fou = A[1][0] * M[0][1] + A[1][1] * M[1][1];
+	A[0][0] = fi;
+	A[0][1] = se;
+	A[1][0] = thi;
+	A[1][1] = fou;
+}
+void power(ll A[2][2],ll n)
+{
+	if(n == 0 || n==1)
+	{
+		return;
+	}
+	power(A,n/2);
+	multiply(A,A);
+	if(n%2 == 1)
+	{
+		ll M[2][2] = {{1,1},{1,0}};
+		multiply(A,M);
+	}
+}
+ll calc_fib(ll n)
+{
+	ll A[2][2] = {{1,1},{1,0}};
+	if(n == 0)
+	{
+		return 0;
+	}
+	power(A,n-1);
+	return A[0][0];
+}
+int main()
+{
+	ll n;
+	cin>>n;
+	ll ans = calc_fib(n-1);
+	cout<<ans<<"\n";
+}

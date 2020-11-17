@@ -7,19 +7,21 @@ struct Query
 {
     ll l,r;
 };
-bool comp(Query a,Query b)
-{
-    if(a.l/blck != b.l/blck)
-    {
-        return a.l/blck < b.l/blck;
-    }
-    return a.r<b.r;
-}
+bool compare(Query x, Query y) 
+{ 
+    // Different blocks, sort by block. 
+    if (x.l/blck != y.l/blck) 
+        return x.l/blck < y.l/blck; 
+  
+    // Same block, sort by R value 
+    return x.r < y.r; 
+} 
+
 void queryresults(ll ar[],ll n,Query q[],ll m)
 {
     blck = (ll)(sqrt(n));
     cout<<blck<<"\n";
-    sort(q,q+m,comp);
+    sort(q,q+m,compare);
     ll su = 0;
     ll currentlef = 0,currentrig = 0;
     for(int i=0;i<m;i++)

@@ -9,29 +9,28 @@ struct Query
 };
 bool comp(Query a,Query b)
 {
-    if(a.l/blck<b.l/blck)
+    if(a.l/blck != b.l/blck)
     {
-        return a.l/blck<b.l/blck;
+        return a.l/blck < b.l/blck;
     }
-    else if(b.l/blck<a.l/blck)
-    {
-        return b.l/blck<a.l/blck;
-    }
-    else
-    {
-        return a.l<b.l;
-    }
+    return a.r<b.r;
 }
-void queryresults(int ar[],int m,Query q[],int m)
+void queryresults(ll ar[],ll n,Query q[],ll m)
 {
     blck = (ll)(sqrt(n));
+    cout<<blck<<"\n";
     sort(q,q+m,comp);
     ll su = 0;
     ll currentlef = 0,currentrig = 0;
     for(int i=0;i<m;i++)
     {
-        ll lef = q[i].l;
-        ll rig = q[i].r;
+        cout<<q[i].l<<" "<<q[i].r<<"\n";
+    }
+    cout<<"\n";
+    for(int i=0;i<m;i++)
+    {
+        ll lef = (q[i].l)-1;
+        ll rig = (q[i].r)-1;
         while(currentlef<lef)
         {
             su-=ar[currentlef];

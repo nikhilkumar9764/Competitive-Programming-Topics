@@ -17,6 +17,11 @@
         "xstring": "cpp",
         "xtree": "cpp",
         "xutility": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "algorithm": "cpp",
+        "chrono": "cpp",
+        "complex": "cpp",
+        "cstdlib": "cpp",
+        "fstream": "cpp"
     }
 }

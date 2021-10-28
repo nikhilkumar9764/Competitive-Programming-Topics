@@ -1,4 +1,4 @@
-// Question : Max query-1 Coding Blocks (Segment Tree used)
+/* Question : Max query-1 Coding Blocks (Segment Tree used)
 
 You are given an array A of N elements and Q queries. Each query consists of 3 integers L R K. For each query, you have to find the number of elements Ax1, Ax2,….,Axj>=K, where L<=x1, x2,…xj<=R.
 
@@ -28,6 +28,7 @@ Sample Output
 3
 2
 1
+*/
 
 
 #include<bits/stdc++.h>
@@ -87,5 +88,112 @@ int main()
       cin>>l>>r>>k;
       ll ans = query_tree(tree,0,n-1,l-1,r-1,1,k);
       cout<<ans<<"\n";
+  }
+}
+
+/* Min query - I 
+You are given an array A of n elements and Q queries. Each query can be of following types:
+
+1 L R: Print the minimum value in AL, AL+1, AL+2….,AR.
+2 X Y: Update the value of Ax with Y.
+Input Format
+First line contains integers N and Q, denoting the number of elements and number of queries. Next line contains N integers, denoting A1, A2, A3….,AN. Next Q lines contains Q queries.
+
+Constraints
+1<=N,Q<=10^5 |Ai|,|Y|<=10^9 1<=L,R,X<=N
+
+Output Format
+Answer each query of type 1.
+
+Sample Input
+5 5
+1 4 3 5 2
+1 1 5
+2 3 9
+1 2 4
+1 2 5
+1 3 4
+Sample Output
+1
+4
+2
+5
+*/
+
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long int;
+#define MOD LLONG_MAX
+ll lazy[10000] = {0};
+ll lazyrange(ll *tree,ll ss,ll se,ll l,ll r,ll idx)
+{
+    if(l>se || r<ss)
+    {
+       return INT_MAX;
+    }
+ 
+      if(ss>=l && se<=r)
+      {
+        return tree[idx];
+      }
+    ll mid = (ss+se)/2; 
+    ll lef = lazyrange(tree,ss,mid,l,r,2*idx);
+    ll rig = lazyrange(tree,mid+1,se,l,r,(2*idx)+1);
+    return min(lef,rig);
+}
+
+void point_update(ll *tree ,ll ss,ll se,ll pt,ll val,ll idx)
+{
+    if(ss>pt || se<pt)
+    {
+       return;
+    }
+    if(ss==se)
+    {
+        tree[idx] = val;
+        return;
+    }
+    ll mid = (ss+se)/2;
+    point_update(tree,ss,mid,pt,val,2*idx);
+    point_update(tree,mid+1,se,pt,val,(2*idx)+1);
+    tree[idx] = min(tree[2*idx],tree[(2*idx)+1]);
+}
+
+void build_tree(ll *tree ,ll ar[] ,ll ss,ll se,ll idx)
+{
+if(ss == se)
+{
+tree[idx] = ar[ss];
+return;
+}
+ll mid = (ss+se)/2;
+build_tree(tree,ar,ss,mid,2*idx);
+build_tree(tree,ar,mid+1,se,(2*idx)+1);
+tree[idx] = min(tree[2*idx],tree[(2*idx)+1]);
+}
+
+int main()
+{
+   ll n,q;
+   cin>>n>>q;
+   ll ar[n];
+   for(int i=0;i<n;i++)
+   {
+    cin>>ar[i];
+   }
+   ll tree[4*n+1]={0};
+   build_tree(tree,ar,0,n-1,1);
+  while(q--)
+  {
+    ll ty,l,r;
+    cin>>ty>>l>>r;
+    if(ty == 1)
+    {
+      ll ans = lazyrange(tree,1,n,l,r,1);
+      cout<<ans<<"\n";
+    }
+    else{
+        point_update(tree,1,n,l,r,1);
+    }
   }
 }

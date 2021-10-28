@@ -1,144 +1,252 @@
-//Query Bits : You are given an n-bit integer (initially 0). There are Q queries. Each query is of following type:
-0 L R: Set all the bits from Lth bit to Rth bit to zero.
-1 L R: Set all the bits from Lth bit to Rth bit to one.
-2 L R: Find the integer formed by the bits in range [L, R]. Answer all the queries of type 2. Indexing is 0-based. See the sample test case for clarity.
-Input Format
-First line contains two integers, nand q. Next Q lines contains Q queries.
-Constraints
-1<=n,q<=200000 0<=L,R<n
-Output Format
-For each query of type 2, print the integer(in decimal) formed by it modulo 109+7.
+/* Comrades- III 
+The human army has proved itself against the mighty aliens by winning the Great War.
+But even in times of peace, the army should remain alert and disciplint.
+
+The army has N soldiers. The soldiers are numbered from 1 to N. The army has a superiority hierarchy. Every soldier has one immediate superior. The superior of a superior of a soldier is also a superior to that soldier. So, a soldier may have one or more superiors but only one immediate superior.
+
+As a exercise to determine the efficiency of the army, the following drill has been designed.
+
+You are given a list of orders. Each order is of the form "<Type><space><ID>"
+where Type is either 1,2 or 3 and ID is a number S (1<=S<=N) that denotes a soldier.
+
+There are three types of orders:
+Type 1:
+All the soldiers who have S as one of their superior will wake up.
+
+Type 2:
+All the soldiers who have S as one of their superior will go to sleep.
+
+Type 3:
+Count and output the number of soldiers who are awake and have S as one of their superior.
+
+NOTE: Among all soldiers there is one soldier who does not have any superior. He is the commander of the whole army.
+
+Input :
+
+The first line contains N, the number of soldiers. The next line contains N space separated integers. The ith integer represents the immediate superior of the ith soldier.
+The immediate superior of the commander of the army will be '0'.
+
+The third line contains Q, the number of orders.
+Each of the next Q lines contain two integers, the type of order and S.
+
+Output :
+
+For each Type-3 order, output the number of soldiers who are awake and have the given soldier as their superior.
+
+Constraints :
+
+1 <= N <= 100000
+1 <= Q <= 100000
+1 <= Type <= 3
+1 <= S <= N
+
+A soldier cannot be his own superior.
+
 Sample Input
-3 6
-1 0 1
-2 0 2
-0 1 1
-2 1 1
-1 2 2
-2 0 2
+3
+2 0 1
+3
+3 1
+2 1
+3 1
 
 Sample Output
-6
+1
 0
-5
+Time Limit: 2
+Memory Limit: 256
+Source Limit:
+Explanation
+Initially all soldiers are awake. There is only one soldier who has soldier 1 as his superior i.e. soldier 3. So the answer of the first Type 3 order is 1. After the order "2 1", all soldiers who have 1 as one of their superiors (here, only soldier 3) will go to sleep. Therefore, the answer of the next order "3 1" is 0.
+
+*/
+
 #include<bits/stdc++.h>
+
 using namespace std;
-using ll = long long int;
-#define MOD (ll) (1e9+7)
 
-ll lazy[200005];
-void buildTree(ll *tree,ll ind,ll s,ll e)
+#define vi vector < int >
+#define pii pair < int , int >
+#define pb push_back
+#define mp make_pair
+#define ff first
+#define ss second
+#define foreach(it,v) for( __typeof((v).begin())it = (v).begin() ; it != (v).end() ; it++ )
+#define ll long long
+#define llu unsigned long long
+#define MOD 1000000007
+#define INF 2000000000
+#define dbg(x) { cout<< #x << ": " << (x) << endl; }
+#define dbg2(x,y) { cout<< #x << ": " << (x) << " , " << #y << ": " << (y) << endl; }
+#define all(x) x.begin(),x.end()
+#define mset(x, v) memset(x, v, sizeof(x))
+#define si(x) (int)x.size()
+#define N 100005
+
+vi adj[N];
+int tin[N],tout[N];
+int timer;
+
+void dfs(int cur,int par)
 {
-	if(s>e)
-		return;
-	if(s==e)
-	{
-		tree[ind] = 0;
-		return;
-	}
-
-	ll mid = (s+e)/2;
-	buildTree(tree,2*ind,s,mid);
-	buildTree(tree,2*ind+1,mid+1,e);
-
-	tree[ind] = 0;
-	return;
-	
-}
-
-
-ll power(ll a,ll b,ll mod = MOD)
-{
-	ll res = 1;
-	while(b)
-	{
-		if(b%2 == 1)
-		{
-			res = (res *a)%mod;
-		}
-		a = (a*a)%mod;
-		b>>=1;
-	}
-	return res;
-}
-
-void lazy_update(ll *t,ll ss,ll se,ll node)
-{
-	if(lazy[node]!=-1)
-	{
-		t[node] = (power(2,(se-ss+1),MOD)-1)*lazy[node];
-		if(ss!=se)
-		{
-			lazy[2*node]=lazy[node];
-			lazy[2*node+1]=lazy[node];
-		}
-		lazy[node] = -1;
-	}
-	
-}
-
-void update_range(ll *t,ll ss,ll se,ll l,ll r,ll val,ll node)
-{
-	   lazy_update(t,ss,se,node);
-	   if(ss>r || se<l)
-	   {
-	     return;
-	   }
-	   if(ss>=l && se<=r)
-	   {
-	       	t[node] = (power(2,(se-ss+1),MOD)-1)*val;
-	       	if(ss!=se)
+    int i;
+    tin[cur] = ++timer;
+    for(i=0;i<adj[cur].size();i++)
+    {
+        int nxt = adj[cur][i];
+        if(nxt != par)
         {
-            lazy[node*2]=val;
-            lazy[node*2+1]=val;
+            dfs(nxt,cur);
+        }
+    }
+    tout[cur] = timer;
+}
+
+struct node
+{
+    int cnt;
+    int lazy;
+}t[4*N];
+
+void build(int node,int s,int e)
+{
+    if(s == e)
+    {
+        t[node].cnt = 1;
+        t[node].lazy = 0;
+        return;
+    }
+
+    int m = (s+e)/2;
+    int c = 2*node;
+
+    build(c,s,m);
+    build(c+1,m+1,e);
+
+    t[node].cnt = t[c].cnt + t[c+1].cnt;
+}
+
+void update(int node,int s,int e,int x,int y,int v)
+{
+    if(s > e)
+        return;
+    int m = (s+e)/2;
+    int c = 2*node;
+
+    if(t[node].lazy)
+    {
+        if(t[node].lazy == 1)
+            t[node].cnt = 0;
+        else
+            t[node].cnt = e - s + 1;
+
+        if(s != e)
+        {
+            t[c].lazy = t[c+1].lazy = t[node].lazy;
+        }
+        t[node].lazy = 0;
+    }
+
+    if(s > y || e < x)
+        return;
+
+    if(x <= s && e <= y)
+    {
+
+        if(v == 1)
+            t[node].cnt = 0;
+        else
+            t[node].cnt = e - s + 1;
+
+        if(s != e)
+        {
+            t[c].lazy = t[c+1].lazy = v;
         }
         return;
-	   }
-	   ll mid=ss+se>>1;
-    update_range(t,ss,mid,l,r,val,node*2);
-    update_range(t,mid+1,se,l,r,val,node*2+1);
-    t[node]=(t[node*2]*power(2,se-mid,MOD)%MOD+t[node*2+1])%MOD;
+    }
+
+    update(c,s,m,x,y,v);
+    update(c+1,m+1,e,x,y,v);
+
+    t[node].cnt = t[c].cnt + t[c+1].cnt;
 }
 
-ll query(ll *t,ll ss,ll se,ll l,ll r,ll node)
+int query(int node,int s,int e,int x,int y)
 {
-    lazy_update(t,ss,se,node);
-	   if(ss>r || se<l)
-	   {
-	     return 0;
-	   }
-	   if(ss>=l && se<=r)
-	   {
-	       return t[node];
-	   }
-	   ll mid= (ss+se)/2;
-    ll p1 = query(t,ss,mid,l,r,(2*node));
-    ll p2 = query(t,mid+1,se,l,r,(2*node)+1);
-    return (p1* power(2,min(se,r)-mid,MOD)%MOD+p2)%MOD;
+    if(s > e || s > y || e < x)
+        return 0;
+    int m = (s+e)/2;
+    int c = 2*node;
+
+    if(t[node].lazy)
+    {
+        if(t[node].lazy == 1)
+            t[node].cnt = 0;
+        else
+            t[node].cnt = e - s + 1;
+
+        if(s != e)
+        {
+            t[c].lazy = t[c+1].lazy = t[node].lazy;
+        }
+        t[node].lazy = 0;
+    }
+
+    if(x <= s && e <= y)
+    {
+        return t[node].cnt;
+    }
+
+    return query(c,s,m,x,y) + query(c+1,m+1,e,x,y);
 }
 
 int main()
 {
-   ll n,m;
-   cin>>n>>m;
-   ll t[4*n+2];
-   for(int i=0;i<200005;i++)
-   {
-      lazy[i] = -1;
-   }
-   buildTree(t,1,0,n-1);
-   while(m--)
-   {
-        int x,l,r;
-        cin>>x>>l>>r;
-        if(x == 0 || x==1 )
+    int n,i;
+    cin>>n;
+
+    assert(1 <= n && n <= 100000);
+
+    int root = -1;
+    for(i=1;i<=n;i++)
+    {
+        int j;
+        cin>>j;
+
+        assert(0 <= j && j <= n);
+
+        if(j == 0)
+            root = i;
+        else
+            adj[j].pb(i);
+    }
+
+    dfs(root,0);
+
+	build(1,1,n);
+     
+    int q;
+    cin>>q;
+
+    assert(1 <= q && q <= 100000);
+
+    while(q--)
+    {
+        int op,u;
+        cin>>op>>u;
+
+        assert(1 <= op && op <= 3);
+        assert(1 <= u && u <= n);
+
+        if(op <= 2)
         {
-            update_range(t,0,n-1,l,r,x,1);
+            update(1,1,n,tin[u]+1,tout[u],3-op);
         }
         else
         {
-            ll ans=query(t,0,n-1,l,r,1);
+            int ans = query(1,1,n,tin[u]+1,tout[u]);
             cout<<ans<<endl;
         }
     }
+    return 0;
 }

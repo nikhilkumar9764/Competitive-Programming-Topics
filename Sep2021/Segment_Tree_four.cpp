@@ -1,3 +1,4 @@
+/*
 Let Fib(x) denote the value of fibonacci of x. For example F(1) =1 , F(2) = 1, F(3) = 2 and so on for all x.
 Let GCD(a,b) denote the greatest common divisor of two numbers a and b.
 You are given an array A of N integers.
@@ -31,6 +32,7 @@ For query 2, gcd(3,21) = 3
 
 My Solution : (Matrix Exponentiation + Segment Trees )
 
+*/
 #include<bits/stdc++.h>
 using namespace std;
 #define ll long long

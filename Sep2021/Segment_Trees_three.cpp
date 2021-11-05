@@ -47,6 +47,7 @@ void buildTree(ll *tree,ll ind,ll s,ll e)
 		tree[ind] = 0;
 		return;
 	}
+<<<<<<< HEAD
 
 	ll mid = (s+e)/2;
 	buildTree(tree,2*ind,s,mid);
@@ -108,6 +109,69 @@ void update_range(ll *t,ll ss,ll se,ll l,ll r,ll val,ll node)
     t[node]=(t[node*2]*power(2,se-mid,MOD)%MOD+t[node*2+1])%MOD;
 }
 
+=======
+
+	ll mid = (s+e)/2;
+	buildTree(tree,2*ind,s,mid);
+	buildTree(tree,2*ind+1,mid+1,e);
+
+	tree[ind] = 0;
+	return;
+	
+}
+
+
+ll power(ll a,ll p,ll m = MOD)
+{
+	ll res=1;
+	while(p>0){
+		if(p&1)
+			res=(res*a)%m;
+		a=(a*a)%m;
+		p>>=1;
+	}
+	return res;
+}
+
+void lazy_update(ll *t,ll ss,ll se,ll node)
+{
+	if(lazy[node]!=-1)
+	{
+		t[node] = (power(2,(se-ss+1),MOD)-1)*lazy[node];
+		if(ss!=se)
+		{
+			lazy[2*node]=lazy[node];
+			lazy[2*node+1]=lazy[node];
+		}
+		lazy[node] = -1;
+	}
+	
+}
+
+void update_range(ll *t,ll ss,ll se,ll l,ll r,ll val,ll node)
+{
+	   lazy_update(t,ss,se,node);
+	   if(ss>r || se<l)
+	   {
+	     return;
+	   }
+	   if(ss>=l && se<=r)
+	   {
+	       	t[node] = (power(2,(se-ss+1),MOD)-1)*val;
+	       	if(ss!=se)
+        {
+            lazy[node*2]=val;
+            lazy[node*2+1]=val;
+        }
+        return;
+	   }
+	   ll mid=ss+se>>1;
+    update_range(t,ss,mid,l,r,val,node*2);
+    update_range(t,mid+1,se,l,r,val,node*2+1);
+    t[node]=(t[node*2]*power(2,se-mid,MOD)%MOD+t[node*2+1])%MOD;
+}
+
+>>>>>>> 4f3c45e70b020e6f332c2d790a11c1cc4ed56794
 ll query(ll *t,ll ss,ll se,ll l,ll r,ll node)
 {
     lazy_update(t,ss,se,node);

@@ -151,6 +151,8 @@ Example : Assumptions --> N = 6
 A =[1,0,3,2,4,6]
 Q = 2  query = [[1,3],[3,6]]
 
+Output : 1 2
+
 N<=10^5
 Q<=10^5
 */
@@ -272,3 +274,236 @@ To be solved using segment trees (Not yet solved yet).
 */
 
 
+/*
+Given a string S of length N and an integer K, the task is to find the minimum character replacements required to make the string palindromic as well as K-periodic.
+
+A K-periodic string can be made only by concatenating several palindromic strings having length K.
+All the characters at positions i, K – i – 1, i + K, 2K – i – 1, i + 2K, 3K – i – 1, i + 3K, … for all 0 ≤ i < K, are equal.
+The problem reduces to making all the characters equal to the one which appears the maximum number of times at these positions in the given string.
+ Follow the steps below to solve the above problem: 
+Initialize a variable ans with 0 that stores the minimum changes required to satisfy the given condition.
+Iterate over the range [0, K / 2] using the variable i.
+Create a hashmap, mp to store the frequency of each character.
+Iterate over the characters in the string starting from i in intervals of K using a variable j and store the frequency of each character.
+Iterate the string in reverse, starting from (N – i – 1) in intervals of K using a variable j and store the frequency of each character. If K is odd and i = K / 2, then break out of the loop.
+Find the maximum frequency of a character among the visited one and store it in a variable, say curr_max.
+After the above steps, if K is odd and i = K/2, then increment ans by (N/K – curr_max)Otherwise, increment ans by (N/K – 2*curr_max).
+After the above steps, print the value of ans as the result. */
+
+// #include<bits/stdc++.h>
+// using namespace std;
+// using ll = long long int;
+// #define MOD (ll) (1e9+7)
+
+// int main()
+// {
+//     string s;
+//     cin>>s;
+//     ll k;
+//     cin>>k;
+//     ll n = s.size();
+//     ll ans = 0;
+//     for(int i=0;i<(k+1)/2;i++)
+//     {
+//            map<ll,ll> ma;
+//            for(int j=i;j<n;j+=k)
+//            {
+//                   ma[s[j]]++;
+//            }
+//            for(int j=n-1-i;j>=0;j-=k)
+//            {
+//                   if(k%2==1 && i==(k/2))
+//                   {
+//                          break;
+//                   }
+//                   ma[s[j]]++;
+//            }
+//            ll maxi = INT_MIN;
+//            for(auto it : ma)
+//            {
+//                   maxi = max(maxi,it.second);
+//            }
+//            if(k%2 == 1 && i==k/2)
+//            {
+//                ans+=(n/k)-maxi;
+//            }
+//            else{
+//               ans+=(n/k)*2-maxi;
+//            }
+//            ma.clear();
+//     }
+//     cout<<ans<<"\n";
+// }
+
+/* Given a string consisting of '0','1','?'  where ? denotes empty space  and an integer k. 
+Fill the blank spaces in such a manner such that the string s becomes k periodic and print the string .
+*/
+
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long int;
+#define MOD (ll) (1e9+7)
+
+int main()
+{ 
+    ll t;
+    cin>>t;
+    while(t--)
+    {
+
+    string s;
+    cin>>s;
+    ll k;
+    cin>>k;
+    ll n = s.size();
+    ll ans = 0;
+    for(int i=0;i<(k);i++)
+    {
+           map<ll,ll> ma;
+           for(int j=i;j<n;j+=k)
+           {
+                  ma[s[j]]++;
+           }
+          
+           char x;
+           ll maxi = INT_MIN;
+           for(auto it : ma)
+           {
+                  if((it.first)!='?' && it.second > maxi)
+                  {
+                       maxi = max(maxi,it.second);
+                       x = it.first;
+                  }  
+           }
+           if(maxi == INT_MIN)
+           {
+               for(int j=i;j<n;j+=k)
+               {
+                   s[j] = '1';
+               }   
+           }
+           else{
+                for(int j=i;j<n;j+=k)
+                {
+                   if(s[j] == '?')
+                   {
+                          s[j] = x;
+                   } 
+                } 
+           }
+           ma.clear();
+    }
+    cout<<s<<"\n";
+    }
+}
+
+/* 
+Tara Capital Quant Developer Hiring Challenge 
+There is an array A of N integers and we need to process Q queries . 
+In each query is of form [L,R] and we need to find in each query between L,R 
+if there exists a subsequence such that the length of the subsequence is equal to largest element present
+in the subsequence , then final answer of each query is XOR the elements of all such subsequences.
+
+Constraints  :  1<=N<=10^5
+                1<=Q<=10^5
+
+suppose N=5
+[2,1,3,4,2] and Q =2
+
+Q1 : [1,3] : there are subsequences [1],[2,1],[2,1,3] answer would be : 1^2^1^2^1^3 = 2.
+Q2 : [2,5] : there is only one subsequence [1,3,4,2] .. answer would be : 1^3^4^2 = 4.
+*/
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long int;
+#define MOD (ll) (1e9+7)
+
+int main()
+{
+        ll n;
+        cin>>n;
+        ll ar[n];
+        for(int i=0;i<n;i++)
+        {
+            cin>>ar[i];
+        }
+        ll pos[n+2]={0};
+        for(int i=0;i<n;i++)
+        {
+            pos[ar[i]] = i+1;
+        }
+        ll maxi[n+2]={0} , mini[n+2]={0};
+        maxi[1] = pos[1];
+        mini[1] = pos[1];
+        for(int i=2;i<=n;i++)
+        {
+            maxi[i] = max(pos[i],maxi[i-1]);
+            mini[i] = min(pos[i],mini[i-1]);
+        }
+        
+        for(int i=1;i<=n;i++)
+        {
+            cout<<mini[i]<<" ";
+        }
+        cout<<"\n";
+        
+        for(int i=1;i<=n;i++)
+        {
+            cout<<maxi[i]<<" ";
+        }
+        cout<<"\n";
+        vector<ll> res;
+        ll q;
+        cin>>q;
+        for(int i=0;i<q;i++)
+        {
+            ll l,r;
+            cin>>l>>r;
+            ll lef = 1,rig = n;
+            ll ans = 0;
+            while(lef<=rig)
+            {
+                ll mid = (lef+rig)>>1;
+                if(mini[mid]>=l && maxi[mid]<=r)
+                {
+                    ans = mid;
+                    lef = mid+1;
+                }
+                else{
+                    rig = mid-1;
+                }
+            }
+            cout<<ans<<"\n";
+            res.push_back(ans);
+        }
+        map<ll,vector<ll>> ma;
+        for(int i=0;i<res.size();i++)
+        {
+            ma[res[i]].push_back(i);
+        }
+       ll ev = 0,odd = 0;
+        for(int i=1;i<=n;i++)
+        {
+             if(i%2 == 1)
+             {
+                 odd^=i;
+             } 
+             else{
+                 ev^=i;
+             }
+             ll curr_xor = ev;
+             if(i%2 == 1)
+             {
+                 curr_xor = odd;
+             }  
+             for(auto pt : ma[i])
+             {
+                 res[pt] = curr_xor;
+             }         
+        }
+        for(auto it : res)
+        {
+        	cout<<it<<" ";
+        }
+        cout<<"\n";
+}

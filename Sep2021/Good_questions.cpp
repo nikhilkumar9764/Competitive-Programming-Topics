@@ -132,7 +132,7 @@ Constraints:
 
 1 <= n <= 7
 nums.length == 2 * n
-1 <= nums[i] <= 106
+1 <= nums[i] <= 10^6
 
 
 Approach used : DP + Bitmasking (Hard)

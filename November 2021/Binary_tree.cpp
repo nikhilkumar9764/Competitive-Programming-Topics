@@ -278,87 +278,154 @@ Binary search tree related operations (Insert , print , delete, search) */
 /*
 Printing the diagonal wise traversal of the tree
 */
-#include<bits/stdc++.h>
-using namespace std;
-using ll = long long int;
-#define MOD (ll) (1e9+7)
+// #include<bits/stdc++.h>
+// using namespace std;
+// using ll = long long int;
+// #define MOD (ll) (1e9+7)
 
-struct Node{
-   int data;
-   Node* left;
-   Node* right;
-};
+// struct Node{
+//    int data;
+//    Node* left;
+//    Node* right;
+// };
 
-Node* newNode(int val)
-{
-    Node* x = new Node();
-    x->data = val;
-    x->left = NULL;
-    x->right = NULL;
-    return x;
-}
+// Node* newNode(int val)
+// {
+//     Node* x = new Node();
+//     x->data = val;
+//     x->left = NULL;
+//     x->right = NULL;
+//     return x;
+// }
 
-Node* insert(Node* root, int val)
-{
-    if(root == NULL)
-    {
-        root = newNode(val);
-    }
-   else if(root->data<=val)
-    {
-        root->right = insert(root->right,val);
-    }
-    else
-    {
-        root->left = insert(root->left,val);
-    }
-    return root;
-}
+// Node* insert(Node* root, int val)
+// {
+//     if(root == NULL)
+//     {
+//         root = newNode(val);
+//     }
+//    else if(root->data<=val)
+//     {
+//         root->right = insert(root->right,val);
+//     }
+//     else
+//     {
+//         root->left = insert(root->left,val);
+//     }
+//     return root;
+// }
 
-void print_diag(Node* root,ll lev,map<ll,vector<ll>> &diag)
-{
-    if(!root)
-    {
-        return;
-    }
-    diag[lev].push_back(root->data);
-    print_diag(root->left,lev+1,diag);
-    print_diag(root->right,lev,diag);
-}
+// void print_diag(Node* root,ll lev,map<ll,vector<ll>> &diag)
+// {
+//     if(!root)
+//     {
+//         return;
+//     }
+//     diag[lev].push_back(root->data);
+//     print_diag(root->left,lev+1,diag);
+//     print_diag(root->right,lev,diag);
+// }
 
-void inorder(Node* root)
-{
-    if(!root)
-    {
-        return;
-    }
-    inorder(root->left);
-    cout<<root->data<<" ";
-    inorder(root->right);
-}
+// void inorder(Node* root)
+// {
+//     if(!root)
+//     {
+//         return;
+//     }
+//     inorder(root->left);
+//     cout<<root->data<<" ";
+//     inorder(root->right);
+// }
 
-int main()
-{
-    Node* root = NULL;
-    root = insert(root, 50);
-    root = insert(root, 30);
-    root = insert(root, 20);
-    root = insert(root, 40);
-    root = insert(root, 70);
-    root = insert(root, 60);
-    root =  insert(root, 80);
-    inorder(root);
-    cout<<"\n";
-    map<ll,vector<ll>> da;
-    print_diag(root,0,da);
-    for(auto it : da)
-    {
-        ll sz = it.second.size();
-        for(int i=0;i<sz;i++)
-        {
-            cout<<it.second[i]<<" ";
-        }
-        cout<<"\n";
-    }
-}
+// int main()
+// {
+//     Node* root = NULL;
+//     root = insert(root, 50);
+//     root = insert(root, 30);
+//     root = insert(root, 20);
+//     root = insert(root, 40);
+//     root = insert(root, 70);
+//     root = insert(root, 60);
+//     root =  insert(root, 80);
+//     inorder(root);
+//     cout<<"\n";
+//     map<ll,vector<ll>> da;
+//     print_diag(root,0,da);
+//     for(auto it : da)
+//     {
+//         ll sz = it.second.size();
+//         for(int i=0;i<sz;i++)
+//         {
+//             cout<<it.second[i]<<" ";
+//         }
+//         cout<<"\n";
+//     }
+// }
+
+/* Boundary traversal of a binary tree */
+// class Solution {
+// public:
+//    void left_boundary(Node *root , vector<int> &p)
+//    {
+//        if(root == NULL || root->left==NULL && root->right ==NULL)
+//        {
+//            return;
+//        }
+//        p.push_back(root->data);
+//        if(root->left)
+//        {
+//            left_boundary(root->left,p);
+//        }
+//        else{
+//            left_boundary(root->right,p);
+//        }
+//    }
+    
+//    void leaves_boundary(Node *root , vector<int> &x)
+//    {
+//        if(root == NULL)
+//        {
+//            return;
+//        }
+//        if(root->left==NULL && root->right ==NULL)
+//        {
+//            x.push_back(root->data);
+//            return;
+//        }
+//        leaves_boundary(root->left,x);
+//        leaves_boundary(root->right,x);
+//    }   
+    
+//    void right_boundary(Node *root , vector<int> &vp)
+//    {
+//         if(root == NULL || root->left==NULL && root->right ==NULL)
+//        {
+//            return;
+//        }
+//        vp.push_back(root->data);
+//        if(root->right)
+//        {
+//           right_boundary(root->right,vp);
+//        }
+//        else{
+//           right_boundary(root->left,vp);
+//        }
+//    } 
+   
+//     vector <int> boundary(Node *root)
+//     {
+//         vector<int> res;
+//         vector<int> xy;
+//         res.push_back(root->data);
+//         left_boundary(root->left,res);
+//         leaves_boundary(root,res);
+//         right_boundary(root->right,xy);
+//         reverse(xy.begin(),xy.end());
+//         for(auto it : xy)
+//         {
+//             res.push_back(it);
+//         }
+//         return res;
+//     }
+// };
 

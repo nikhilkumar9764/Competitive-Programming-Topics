@@ -452,3 +452,101 @@ given a number n , calculate the number of BST that can be formed
 //      cout<<"\n";
 //      cout<<dp[n]<<"\n";
 // }
+
+/* Matrix chain multiplication :   O(n^2) approach
+ Given a sequence of matrices, find the most efficient way to multiply these matrices together. The problem is not actually to perform the multiplications,
+ but merely to decide in which order to perform the multiplications.
+We have many options to multiply a chain of matrices because matrix multiplication is associative. In other words, no matter how we parenthesize the product, the result will be the same. 
+For example, if we had four matrices A, B, C, and D, we would have: 
+
+(ABC)D = (AB)(CD) = A(BCD) = ....
+However, the order in which we parenthesize the product affects the number of simple arithmetic operations needed to compute the product, or the efficiency. For example, suppose A is a 10 × 30 matrix, 
+B is a 30 × 5 matrix, and C is a 5 × 60 matrix. Then,  
+(AB)C = (10×30×5) + (10×5×60) = 1500 + 3000 = 4500 operations
+A(BC) = (30×5×60) + (10×30×60) = 9000 + 18000 = 27000 operations.
+Clearly the first parenthesization requires less number of operations.
+Given an array p[] which represents the chain of matrices such that the ith matrix Ai is of dimension p[i-1] x p[i]. We need to write a function MatrixChainOrder() that should return the minimum number of multiplications needed to multiply the chain.  
+*/
+
+// #include<bits/stdc++.h>
+// using namespace std;
+// using ll = long long int;
+// #define MOD (ll) (1e9+7)
+
+// int main() 
+// {
+//      ll n;
+//      cin>>n;
+//      ll ar[n+1];
+//      for(int i=0;i<=n;i++)
+//      {
+//          cin>>ar[i];
+//      }
+//      ll dp[n][n] = {0};
+//      for(int i=1;i<n;i++)
+//      {
+//          ll r = 0, c = i;
+//          while(c<n)
+//          {
+//              ll val = INT_MAX;
+//              for(int j=r;j<c;j++)
+//              {
+//                  val = min(val , dp[r][j] + dp[j+1][c] + ar[r]*ar[j+1]*ar[c+1]);
+//              }
+//              dp[r][c] = val;
+//              ++r;
+//              ++c;
+//          }
+//      }
+//      cout<<dp[0][n-1]<<"\n";
+// }
+
+/* Mixtures problem SPOJ 
+*/
+
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long int;
+#define MOD (ll) (1e9+7)
+
+ll ar[1000];
+ll dp[1000][1000];
+
+ll get_sum(ll s,ll e)
+{
+    ll su = 0;
+    for(int i=s;i<=e;i++)
+    {
+        su+=ar[i];
+        su%=100;
+    }
+    return su;
+}
+int main() 
+{
+    ll n;
+    while(scanf("%lld",&n)!=EOF)
+    {
+     for(int i=0;i<n;i++)
+     {
+         cin>>ar[i];
+     }
+     
+     for(int i=1;i<n;i++)
+     {
+         ll r = 0, c = i;
+         while(c<n)
+         {
+             ll val = INT_MAX;
+             for(int j=r;j<c;j++)
+             {
+                 val = min(val , dp[r][j] + dp[j+1][c] + get_sum(r,j)*get_sum(j+1,c));
+             }
+             dp[r][c] = val;
+             ++r;
+             ++c;
+         }
+     }
+     cout<<dp[0][n-1]<<"\n";
+    }
+}

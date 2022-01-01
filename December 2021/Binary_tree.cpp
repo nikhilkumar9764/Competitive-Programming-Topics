@@ -246,82 +246,82 @@ The paths should all be downwards only.
 
 /* Print all the path from root which has a specified sum */
 
-#include<bits/stdc++.h>
-using namespace std;
-using ll = long long int;
-#define MOD (ll) (1e9+7)
+// #include<bits/stdc++.h>
+// using namespace std;
+// using ll = long long int;
+// #define MOD (ll) (1e9+7)
 
-struct Node{
-   int data;
-   Node* left;
-   Node* right;
-};
+// struct Node{
+//    int data;
+//    Node* left;
+//    Node* right;
+// };
 
-Node* newNode(int val)
-{
-    Node* x = new Node();
-    x->data = val;
-    x->left = NULL;
-    x->right = NULL;
-    return x;
-}
+// Node* newNode(int val)
+// {
+//     Node* x = new Node();
+//     x->data = val;
+//     x->left = NULL;
+//     x->right = NULL;
+//     return x;
+// }
 
-void inorder(Node* root)
-{
-    if(!root)
-    {
-        return;
-    }
-    inorder(root->left);
-    cout<<root->data<<" ";
-    inorder(root->right);
-}
+// void inorder(Node* root)
+// {
+//     if(!root)
+//     {
+//         return;
+//     }
+//     inorder(root->left);
+//     cout<<root->data<<" ";
+//     inorder(root->right);
+// }
 
-void print_path(vector<ll> &ans)
-{
-    for(int j=0;j<ans.size();j++)
-    {
-        cout<<ans[j]<<" ";
-    }
-    cout<<"\n";
-}
+// void print_path(vector<ll> &ans)
+// {
+//     for(int j=0;j<ans.size();j++)
+//     {
+//         cout<<ans[j]<<" ";
+//     }
+//     cout<<"\n";
+// }
 
-void print_path_sum_k(Node *root ,vector<ll> &an,ll target)
-{
-    if(root == NULL)
-    {
-        return;
-    }
-    an.push_back(root->data);
-    print_path_sum_k(root->left,an,target);
-    print_path_sum_k(root->right,an,target);
-    ll su = 0;
-    for(int i=an.size()-1;i>=0;i--)
-    {
-        su+=an[i];
-    }
-    if(su == target)
-    {
-        print_path(an);
-    }
-    an.pop_back();
-}
+// void print_path_sum_k(Node *root ,vector<ll> &an,ll target)
+// {
+//     if(root == NULL)
+//     {
+//         return;
+//     }
+//     an.push_back(root->data);
+//     print_path_sum_k(root->left,an,target);
+//     print_path_sum_k(root->right,an,target);
+//     ll su = 0;
+//     for(int i=an.size()-1;i>=0;i--)
+//     {
+//         su+=an[i];
+//     }
+//     if(su == target)
+//     {
+//         print_path(an);
+//     }
+//     an.pop_back();
+// }
 
-int main()
-{
-    Node* root = newNode(2);
-    root->left = newNode(2);
-    root->left->left = newNode(5);
-    root->left->right = newNode(6);
-    root->left->right->left = newNode(1);
-    root->right = newNode(-1);
-    root->right->left = newNode(7);
-    root->right->left->left = newNode(10);
-    root->right->left->right = newNode(11);
-    root->right->right = newNode(8);
-    root->right->right->right = newNode(12);
-    ll k;
-    cin>>k;
-    vector<ll> an;
-    print_path_sum_k(root,an,k);
-}
+// int main()
+// {
+//     Node* root = newNode(2);
+//     root->left = newNode(2);
+//     root->left->left = newNode(5);
+//     root->left->right = newNode(6);
+//     root->left->right->left = newNode(1);
+//     root->right = newNode(-1);
+//     root->right->left = newNode(7);
+//     root->right->left->left = newNode(10);
+//     root->right->left->right = newNode(11);
+//     root->right->right = newNode(8);
+//     root->right->right->right = newNode(12);
+//     ll k;
+//     cin>>k;
+//     vector<ll> an;
+//     print_path_sum_k(root,an,k);
+// }

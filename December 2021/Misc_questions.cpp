@@ -544,3 +544,85 @@ int main()
        cout<<ans<<"\n";
    }
 } 
+
+/* Makemy Trip -Software Engineer Hackerearth Test
+
+Given a string s of length n and a tree rooted at 1. You are given n-1 edges representing the tree, and each node representing the character 
+of the string. Find the number of nodes in the tree such that there is no node in their subtree which has same value as the root node 
+
+Example :  N=6
+           s = "cebbcb"
+           1-5 , 5-4, 4-3, 3-2, 3-6
+
+Explaination : Nodes 5,2,6 have no child in the subtree having same character as the nodes.
+So answer is 3.
+ */
+
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long int;
+#define MOD (ll) (1e9+7)
+#define MAX (ll) (1e5+4)
+
+vector<ll> res[MAX];
+vector<ll> adj[MAX];
+bool vis[MAX];
+
+void dfs(ll src,vector<ll> &v)
+{
+    vis[src] = true;
+    v.push_back(src);
+    for(int i=0;i<adj[src].size();i++)
+    {
+        ll el = adj[src][i];
+        if(vis[el] == false)
+        {
+            for(int j=0;j<v.size();j++)
+            {
+                res[v[j]].push_back(el);
+            }
+            dfs(el,v);
+        }
+    }
+    auto it = find(v.begin(),v.end(),src);
+    v.erase(it);
+}
+
+int main()
+{
+       ll n;
+       cin>>n;
+       string s;
+       cin>>s;
+       ll x,y;
+       for(int i=0;i<n-1;i++)
+       {
+           cin>>x>>y;
+           adj[x].push_back(y);
+           adj[y].push_back(x);
+       }
+       vector<ll> v;
+       dfs(1,v);
+      ll cnt = 0;
+      for(int j=1;j<=n;j++)
+      {
+          ll fl = 0;
+          if(res[j].size()>0)
+          {
+            for(int i=0;i<res[j].size();i++)
+            {
+              ll idx = res[j][i];
+              if(s[j-1] == s[idx-1])
+              {
+                  fl = 1;
+                  break;
+              }
+            }
+          }
+          if(fl==0)
+          {
+              cnt++;
+          }
+      }
+      cout<<cnt<<"\n";
+}

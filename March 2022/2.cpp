@@ -77,3 +77,60 @@ int main()
     root->right->right->right->right->left= newNode(10);
     cout << "Max pathSum of the given binary tree is "<< maxSum(root)<<"\n";
 }
+
+/* GFG Question : 
+Given an array of integers having size N , find a subsequence of length M such that minimum difference between any 2 pair 
+of integers is maximum. 
+
+Can be solved in NlogN time using Binary search.
+*/
+
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long int;
+
+bool can_place(ll ar[],ll n,ll b,ll vv)
+{
+    ll curr = ar[0];
+    ll cnt = 1;
+    for(int i=1;i<n;i++)
+    {
+        if(abs(ar[i]-curr)>=vv)
+        {
+            curr = ar[i];
+            cnt++;
+        }
+        if(cnt == b)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+int main()
+{
+	ll n,b;
+	cin>>n>>b;
+	ll ar[n];
+	for(int i=0;i<n;i++)
+	{
+		cin>>ar[i];
+	}
+	sort(ar,ar+n);
+	ll low = 0,hi =*max_element(ar,ar+n);
+	ll ans = -1;
+	while(low<=hi)
+	{
+	    ll mid = (low+hi)/2;
+	    if(can_place(ar,n,b,mid))
+	    {
+	        ans = mid;
+	        low = mid+1;
+	    }
+	    else{
+	        hi = mid-1;
+	    }
+	}
+	cout<<"Answer is :"<<ans<<"\n";
+}

@@ -93,3 +93,5 @@ int main()
     cout<<ans<<"\n";
 }
 
+/* Atcoder Beginner 243 -- C Problem */
+

@@ -2,8 +2,6 @@
 from i-k to i+k . Find the minimum no of candles to light up such that entire row gets lit up.
 
 */
-
-
 #include <bits/stdc++.h>
 using namespace std;
 using ll = long long int;

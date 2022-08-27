@@ -88,9 +88,6 @@ int main()
 }
 
 
-
-
-
 /* Amazon SDE-1 Hackerearth OA question 
 Given a tree of N nodes whose vertices are numbered from 1 to N. We need to remove two edges from tree to form three 
 connected components. And we want to minimize the difference of maximum of xors and minimum of xors of the vertices of the
@@ -126,43 +123,73 @@ But now the problem is how to find the xor of the components?
 We could just find the xor of the current pairs and we could then use the xor of the whole tree to find the xor of the remaining tree.
 
 Find the Xor of each subtree
-void dfs(int curr, int par) {
-    inTime[curr] = ++currTime;
-    subtreeXor[curr] = curr;
-    
-    for(auto child : adj[curr]) {
-        if(child != par) {
-           dfs(child, curr);
-           subtreeXor[curr] ^= subtreeXor[child];
-        }
-    }
-    
-    outTime[curr] = ++currTime;
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long int;
+#define MAX (ll) (1e5+7)
+vector<ll> adj[MAX];
+ll intime[MAX] , outtime[MAX];
+ll subtree[MAX];
+bool vis[MAX];
+ll val = 0;
+
+void dfs(int curr,int par)
+{
+	vis[curr] = true;
+	intime[curr]=++val;
+	subtree[curr] = curr;
+	for(auto it : adj[curr])
+	{
+		if(it!=curr && !vis[it])
+		{
+			dfs(it,curr);
+			subtree[curr]^= subtree[it];
+		}
+	}
+	outtime[curr]=++val;
 }
-For each pair of vertex, each being in the different connected component, find the xor of third component
-    dfs(1, -1);
-    int xorTree = subtreeXor[1];
-    int ans = INT_MAX;
-    for(int i = 2; i <= n; i++) {
-        for(int j = i + 1; j <= n; j++) {
-            int a, b, c;
-            
-            if(!sameSubtree(i, j) && !sameSubtree(j, i)) {
-                a = subtreeXor[i], b = subtreeXor[j];
-            } else if(sameSubtree(i, j)) {
-                a = subtreeXor[j], b = (a ^ subtreeXor[i]);
-            } else if(sameSubtree(j, i)) {
-                a = subtreeXor[i], b = (a ^ subtreeXor[j]);
+
+bool check_same_subtree(ll x, ll y)
+{
+    return (intime[x]<=intime[y]) && (outtime[y]<=outtime[x]);
+}
+
+int main()
+{
+    ll n,m;
+    cin>>n>>m;
+    ll x,y;
+    for(int i=0;i<m;i++)
+    {
+    	cin>>x>>y;
+    	adj[x].push_back(y);
+    	adj[y].push_back(x);
+    }
+    dfs(1,-1);
+    ll a,b,c;
+    ll ans = INT_MAX;
+    ll xortree = subtree[1];
+    for(int i=2;i<=n;i++)
+    {
+        for(int j=i+1;j<=n;j++)
+        {
+            if(!check_same_subtree(i,j) && !check_same_subtree(j,i))
+            {
+                a = subtree[i],b=subtree[j];
             }
-            
-            c = (xorTree ^ a ^ b);
-            ans = min(ans, max({a, b, c}) - min({a, b, c}));
+            else if(check_same_subtree(i,j))
+            {
+                a = subtree[i],b=(a^subtree[j]);
+            }
+            else if(check_same_subtree(j,i))
+            {
+                a = subtree[j],b=(a^subtree[i]);
+            }
+            c = (xortree^a^b);
+            ans = min(ans,max({a,b,c})-min({a,b,c}));
         }
     }
-Check in constant time whether a vertex lies in subtree of other vertex.
-// b is in subtree of a.
-bool sameSubtree(int a, int b) {
-    return (inTime[a] <= inTime[b]) && (outTime[b] <= outTime[a]);
+    cout<<ans<<"\n";
 }
 
 
@@ -257,3 +284,79 @@ class Solution
 
 
 
+/*  Leetcode Trees question (Hard)
+Given a binary tree root, return the maximum sum of all keys of any sub-tree which is also a Binary Search Tree (BST).
+
+Assume a BST is defined as follows:
+
+The left subtree of a node contains only nodes with keys less than the node's key.
+The right subtree of a node contains only nodes with keys greater than the node's key.
+Both the left and right subtrees must also be binary search trees.
+ 
+
+Example 1:
+
+
+
+Input: root = [1,4,3,2,4,2,5,null,null,null,null,null,null,4,6]
+Output: 20
+Explanation: Maximum sum in a valid Binary search tree is obtained in root node with key equal to 3.
+Example 2:
+
+
+
+Input: root = [4,3,null,1,2]
+Output: 2
+Explanation: Maximum sum in a valid Binary search tree is obtained in a single root node with key equal to 2. */
+
+class Info
+{
+     public :
+    int maxi,mini;
+    int sum;
+    bool isBst ;
+   
+       Info()
+       {
+           maxi = INT_MIN;
+           mini = INT_MAX;
+           sum = 0;
+           isBst = true;
+       }
+};
+
+class Solution 
+{
+private : 
+    Info solve(TreeNode *root , int &maxans)
+    {
+        if(root == NULL)
+        {
+            Info x;
+            return x;
+        }
+        
+        Info left = solve(root->left,maxans);
+        Info right = solve(root->right,maxans);
+        Info curr;
+        if(left.isBst && right.isBst && (root->val) > left.maxi && (root->val) < right.mini)
+        {
+            curr.mini = min(root->val,left.mini);
+            curr.maxi = min(root->val,right.maxi);
+            curr.sum = root->val+left.sum+right.sum;
+            maxans = max(maxans,curr.sum);
+        }
+        else{
+            curr.isBst=false;
+        }
+        return curr;
+    }
+
+    
+public:
+    int maxSumBST(TreeNode* root) {
+        int maxans = 0;
+        solve(root,maxans);
+        return maxans;
+    }
+};

@@ -91,7 +91,7 @@ Two integers N M on the first line.
 N lines follow, where the i-th line of these describes the i-th segment. Each line has two integers, the first one describes the length of the segment and the second describes the maximum speed limit of this segment.
 M lines follow, where the j-th line of these describes the j-th segment. Each line has two integers, the first one describes the length of the segment and the second describes the speed at which you travelled in this segment.
 
-Constraints
+Constraints : 
 The lengths of all N segements add up to 100.
 The lengths of all M segments add up to 100.
 All lengths are positive integers.

@@ -276,3 +276,71 @@ int main ()
 
 
 */
+
+
+
+
+/* 
+Codeforces question (Remove the brackets)
+
+RSJ has a sequence a of n integers a1,a2,…,an and an integer s
+. For each of a2,a3,…,an−1, he chose a pair of non-negative integers xi and yi such that xi+yi=ai and (xi−s)⋅(yi−s)≥0.
+
+Now he is interested in the value
+F=a1⋅x2+y2⋅x3+y3⋅x4+…+yn−2⋅xn−1+yn−1⋅an.
+Please help him find the minimum possible value F he can get by choosing xi and yi optimally. It can be shown that there is always at least one valid way to choose them.
+*/
+
+
+#include <bits/stdc++.h>
+using namespace std;
+ 
+#define watch(x) cout << (#x) << " = " << (x) << endl
+#define MOD 1000000007
+ 
+long long a[200005], x[200005], y[200005], dp[200005][2];
+long long n;
+ 
+long long solve(long long index, long long next, int turn)  {
+    if(index == n)  {
+        return next * a[n];
+    }
+    if(dp[index][turn] != -1)   {
+        return dp[index][turn];
+    }
+    
+    long long ans = (next * x[index]) + solve(index+1, y[index], 0);
+    long long ans1= (next * y[index]) + solve(index+1, x[index], 1);
+    return dp[index][turn] = min(ans, ans1);
+}
+ 
+int main()  {
+    long long t;
+    cin >> t;
+    while(t--)  {
+        long long s;
+        cin >> n >> s;
+        for(long long i = 1; i <= n; i++)  {
+            cin >> a[i];
+            dp[i][0] = -1;
+            dp[i][1] = -1;
+        }
+        for(long long i = 2; i <= (n-1); i++) {
+            if(a[i] >= 2*s) {
+                x[i] = s;
+                y[i] = a[i] - s;
+            } else if(a[i] >= s && a[i] < (2*s))    {
+                x[i] = a[i] - s;
+                y[i] = s;
+            } else {
+                x[i] = 0;
+                y[i] = a[i];
+            }
+        }
+        long long ans = (a[1] * x[2]) + solve(3, y[2], 0);
+        long long ans1 = (a[1] * y[2]) + solve(3, x[2], 1);
+        
+        cout << min(ans, ans1) << "\n";
+    }
+    return 0;
+} 

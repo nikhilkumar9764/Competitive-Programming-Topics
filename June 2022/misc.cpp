@@ -32,7 +32,8 @@ class Solution
 {
  public:
     using ll = long long int;
-   long long colosseum(int N, vector<int> a) {
+   long long colosseum(int N, vector<int> a) 
+   {
 
       vector<long long> L(N * 3 + 1), R(N * 3 + 1); // create 
       for (int i = 0; i <= 3 * N; ++i) {
@@ -83,7 +84,8 @@ class Solution
 
 /*  
 There is a road of length 100 km which you travelled. There are different speed limits for different segments of the road. 
-There are N such segments. And if one were to describe your driving, you drove in M segments. In each segment, you maintained a constant speed. 
+There are N such segments. And if one were to describe your driving, you drove in M segments. In each segment, you maintained a 
+constant speed. 
 You want to find out the maximum amount you went over the speed limit.
 
 Input

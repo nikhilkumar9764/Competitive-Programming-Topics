@@ -273,9 +273,14 @@ int main ()
 }
 
 /* Aesthetic Permutations (Trilogy Innovations Test question)
+ Mr.Hola has an array A and integer b. The aesthetic value of array A is summation of |A[i]-A[i+b]| over all i from 1 to N-b .
+You have to find the minimum aesthetic value for any permutation of array A .
 
-
+Constraints :    2<=N<=3*10^5 
+                1<=B<=min(5000,N-1)
 */
+
+
 
 
 

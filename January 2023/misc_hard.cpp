@@ -178,3 +178,64 @@ remaining list */
 /* Given a list of integers in an array A , find the number of pairs (i,j) such that A[i]^A[j] > A[i]&A[j] 
 To be done in linear time */
 
+#include <bits/stdc++.h>
+#define debug cout<< "here" <<'\n';
+#define PII pair<int, int>
+#define PLL pair<long long, long long>
+#define rep(i,a,b) for(int i = a; i <= b; i ++ )
+#define per(i,a,b) for(int i = a; i >= b; i -- )
+#define aurep(i,u) for(auto& i : u)
+
+typedef long long ll;
+
+using namespace std;
+
+const int N = 2e5 + 10;
+const int mod = 1e9 + 7;
+
+unordered_map<int,int> vp1;
+unordered_map<int,int> vp2;
+
+ll C(int x) {
+	if(x <= 0) return 0;
+	return 1ll * (x + 1) * x / 2;
+}
+
+void solve() {
+	int n; cin >> n;	
+	rep(i, 1, n) {
+		int tmp; cin >> tmp;
+		vp1[tmp] = i;
+	}
+	rep(i, 1, n) {
+		int tmp; cin >> tmp;
+		vp2[tmp] = i;
+	}
+	
+	int L = min(vp1[1], vp2[1]), R = max(vp1[1], vp2[1]);
+	ll ans = C(L - 1) + C(R - L - 1) + C(n - R);
+	rep(i, 2, n) {
+		int x = vp1[i], y = vp2[i];
+		if((x < L && y < L)) {
+			ans += 1ll * (n - R + 1) * (L - max(x, y));
+		}
+		if(x > R && y > R) {
+			ans += 1ll * L * (min(x, y) - R);
+		}
+		if((x < L && y > R) || (x > R && y < L)) {
+			ans += 1ll * (L - min(x, y)) * (max(x, y) - R);
+		}
+		L = min(L, min(x, y));
+		R = max(R, max(x, y));
+	}	
+	cout << ans + 1;
+}
+
+int main() {
+	ios::sync_with_stdio(false);cin.tie(0), cout.tie(0);
+	int t = 1;// cin >> t;
+	while(t--) {
+		solve();
+	}
+	return 0;
+}

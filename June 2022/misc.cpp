@@ -8,6 +8,11 @@ output should be 35627
 */
 
 
+/* An array containing different car length is given [c0,c1,c2,....cn-1]. Also given are number of worker available and 
+b the cost per unit length they will take per unit length to paint . Find the minimum amount that it would cost to paint all the 
+given cars (Painter partition problem)
+*/
+
 
 
 

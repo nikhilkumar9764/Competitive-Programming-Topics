@@ -10,7 +10,7 @@ Example: wordlist = ["yellow"], query = "YellOw": correct = "yellow"
 Example: wordlist = ["Yellow"], query = "yellow": correct = "Yellow" 
 Example: wordlist = ["yellow"], query = "yellow": correct = "yellow" 
   
-  
+   
 Vowel Errors: If after replacing the vowels ('a', 'e', 'i', 'o', 'u') of the query word 
 with any vowel individually, it matches a word in the wordlist (case-insensitive), 
 then the query word is returned with the same case as the match in the wordlist. 

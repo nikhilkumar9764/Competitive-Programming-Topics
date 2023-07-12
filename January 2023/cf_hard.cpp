@@ -349,3 +349,173 @@ int main()  {
     }
     return 0;
 } 
+
+/* Given a number n , find out the lexicographically largest sequence of numbers ( 0<=x<=n-1) such that for each index
+i , element at that index x , x+i is prime or x==1 or x==0 
+
+For example : 
+n = 9
+output should be : [7 6 5 8 3 2 1 4 0]
+ */
+
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long int;
+#define MOD (ll) (1e9+7)
+
+vector<ll> pp ;
+bool check_prime(ll n)
+{
+    bool isp = true;
+    for(int j=2;j*j<=n;j++)
+    {
+        if(n%j == 0)
+        {
+            isp = false;
+            break;
+        }
+    }
+    return isp;
+}
+
+
+void calc_primes(ll val)
+{
+    bool primes[100005];
+    for(int j=1;j<=100005;j++)
+    {
+        primes[j] = true;
+    }
+    for(int j=2;j*j<=val;j++)
+    {
+       for(int k=j*2;k<=val;k+=j)
+       {
+           primes[k] = false;
+       }
+    }
+    for(int p=2;p<=val;p++)
+    {
+        if(primes[p] == true)
+        {
+            pp.push_back(p);
+        }
+    }
+}
+
+int main() 
+{
+    ll n;
+    cin>>n;
+    calc_primes(100005);
+    vector<ll> v1;
+    auto it = *(upper_bound(pp.begin(),pp.end(),n));
+    auto it1 = *(lower_bound(pp.begin(),pp.end(),n)-1);
+    
+    bool vis[n+1] = {false};
+    for(int j=0;j<=n-1;j++)
+    {
+        int vv = it-j;
+        int vv2 = it1-j;
+        if((!vis[vv] && vv<=n-1) && (!vis[vv2] && vv2<=n-1))
+        {
+            v1.push_back(vv);
+            vis[vv] = true;
+        }
+        else if(vv2>0 && !vis[vv2] && vv2<=n-1)
+        {
+            v1.push_back(vv2);
+            vis[vv2] = true;
+        }
+        else{
+            ll v1p = n-1-j;
+            cout<<v1p<<"\n";
+            v1.push_back(v1p);
+            vis[v1p] = true;
+        }
+    }
+    
+    for(auto it : v1)
+    {
+        cout<<it<<" ";
+    }
+    cout<<"\n";
+  
+}
+
+
+
+/* GP Hiring contest q1 -- building servers*/
+
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long int;
+#define MOD (ll) (1e9+7)
+
+bool cmp(const pair<ll,ll> &p1 , const pair<ll,ll>& p2)
+{
+    return p1.first > p2.first;
+}
+
+int main()
+{
+    ll n,m;
+    cin>>n>>m;
+    ll c[n] ,f[n];
+    for(int j=0;j<n;j++)
+    {
+        cin>>c[j];
+    }
+    for(int j=0;j<n;j++)
+    {
+        cin>>f[j];
+    }
+    
+    vector<pair<ll,ll>> vp;
+    // answer will be picking up first m elements from the vector and calculating total_power as well as versatility in it, 
+    // or adding up to top m versatile elements from the vector and then picking up the remaining elements for maximizing total_power
+    
+    ll su1 = 0 , su2 = 0;
+    for(int i=0;i<n;i++)
+    {
+        vp.push_back({c[i],f[i]});
+    }
+    
+    sort(vp.begin(),vp.end(),cmp);
+    set<ll> se1, se2;
+    bool vis[n+1] = {false};
+    for(int j=0;j<m;j++)
+    {
+        su1+=vp[j].first;
+        se1.insert(vp[j].second);
+    }
+    
+    su1+=pow(se1.size(),2);
+    
+    for(int j=0;j<n;j++)
+    {
+        if(se2.find(vp[j].second) == se2.end() && se2.size()<m)
+        {
+            su2+=vp[j].first;
+            se2.insert(vp[j].second);
+            vis[j] = true;
+        }
+    }
+    
+    ll rem = m-se2.size();
+    for(int j=0;j<n;j++)
+    {
+        if(!vis[j] && se2.size()<m)
+        {
+            su2+=vp[j].first;
+            se2.insert(vp[j].second);
+            vis[j] = true;
+        }
+    }
+    su2+=pow(se2.size(),2);
+    
+    cout<<su1<<" "<<su2<<"\n";
+    ll ans = max(su1,su2);
+    cout<<ans<<"\n";
+}
+
+

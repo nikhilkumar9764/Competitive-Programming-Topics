@@ -1,0 +1,625 @@
+This semester, you will be writing some of the major features of an operating
+system kernel. The various components of the kernel are separated into various
+libraries; each “Phase” of the project implements a different library.
+The various phases will be strictly separated from each other; at no time
+can they share variables! Their only interaction will be through function calls
+(which you can think of a bit like “methods” in an object-oriented system).
+Moreover, when we test each Phase, we will have instructor-provided libraries
+that give the full implementation for each previous phase. For this reason, it
+is critical that you implement the functions exactly as stated in the spec -
+otherwise, your code will not be able to interact with the instructor code, and
+you will fail all of the testcases.
+1.1 Phase List
+The project will have 4 Phases, as follows:
+ Phase 1 - Process Control
+Keeps track of what processes exist, what their names are and what the
+parent/child relationships are.
+Blocks and unblocks processes as requested by higher-level code (must be
+implemented in Phase 1, but won’t be used until Phase 2), and handles
+all dispatching decisions.
+ Phase 2 - Messages and Interrupt Handlers
+
+Implements “mailboxes,“ which are data structures that keep track of mes-
+sages. It uses the functions from Phase 1 to block and unblock processes
+
+as the processes send, receive, and wait for messages.
+In addition, this Phase implements the basic mechanisms for interrupts
+and system calls. While you will write interrupt handlers for all of the
+devices that USLOSS supports (clock, terminals, and disks), you will not
+write the actual device drivers themselves - that happens in Phase 4.
+
+1
+
+Instead, in this Phase, you will write the interrupt handler for each device,
+which turns a device interrupt into a message.
+ Phase 3 - User Processes and Syscalls
+Implements a set of system calls, which allow user-mode code to make
+requests of the kernel.
+ Phase 4 - Device Drivers
+Adds device drivers for the clock, terminal, and disk devices. You will
+also implement system calls that allow the user-mode code to access these
+devices.
+2 Phase 1 Overview
+In this Phase, you will implement one major data structure - the process table
+- along with any number of smaller data structures to help. Although I will
+require that your process table has a certain size - and that we use those slots
+in a certain way - I will otherwise give you complete freedom about how you
+implement your data.
+You will be required to implement the following functions, which may be
+called from other kernel-mode code (never from user-mode code). See below in
+this spec for details on each required function.
+ dispatcher()
+This function is called, from various places, when we might want to
+context-switch to another process. It will examine which processes are
+currently runnable, compare their priorities, and make a decision: it may
+context switch to another process, or it may decide to keep running the
+current one.
+This function will be called by your own code (such as spork() and
+
+join()). It will also be called by the Phase 1 Helper in some cirsum-
+stances.
+
+This function should always be called with interrupts disabled, and when
+it returns, interrupts will still be disabled.
+ phase1_init()
+This will be called exactly once, when the simulation starts up. Initialize
+your data structures, including setting up the process table entry for the
+starting process, init.
+Although you will create a process table entry for init, you must not run
+it (yet).
+ spork(...)
+
+2
+
+This function creates a new process, which is a child of the currently
+running process.1
+ join(...)
+Like the UNIX wait() syscall, this function blocks the current process
+until one of its children has terminated; it then delivers the “status” of
+the child (that is, the parameter that the child passed to quit()) back to
+the parent.
+ quit(...)
+This function never returns.
+
+Like the UNIX exit() syscall, this function terminates the current pro-
+cess, with a certain “status” value. If the parent of this process is already
+
+waiting in a join(), then the parent will be awoken.
+While the current process will never again run any code, it will continue
+to take up space in the process table until its status has been delivered to
+its parent.
+ getpid()
+Returns the PID of the current executing process.
+ dumpProcesses()
+Prints human-readable debug data about the process table.
+ blockMe(...)
+Used by other Phases to ask that the current process be blocked for a
+while. The process will not run again until unblockProc() is called on it.
+ unblockProc(...)
+
+Moves a process (not the current process) from the blocked state to un-
+blocked; it will run again as soon as the dispatcher allows.
+
+(spec continues on the next page)
+1
+In a UNIX system, you normally call the fork() system call to create a new process. But
+our operation is pretty different, so we gave it another name.
+
+3
+
+3 Special Process: init
+Your Phase 1 code must implement a special kernel-mode process called init.
+init must always have PID 1, and it will never die. It must run at the lowest
+priority (6), meaning that it will only run if every other process blocks. It will
+call spork() to create the other processes in the system.
+You do not have to implement the code for this process, but your process
+table must have an entry for it, and your dispatcher must switch to it when
+appropriate. The “main” function for this process is init_main(), and it will
+be provided by the “Phase 1 Helper” code that I provide. This means that your
+code must:
+ Fill in slot [1] in the process table
+ Set up a USLOSS_Context struct, which will (eventually) run init_main()
+(Read the PDF for the Phase 1 Helper. You should use russ_ContextInit(),
+instead of USLOSS_ContextInit(), to initialize the Context struct.)
+ Switch to it, like any other process, when appropriate.
+(In Phase 1A, code that I provide will call TEMP_switchTo(1) to run the
+init process the first time. In Phase 1B, you must list it as a runnable
+process, and when we call dispatcher() the first time, your code must
+choose the init process, and context switch to it.)
+The init process will never call quit().
+4 Special Process: testcase main
+The testcase_main process is handled by the testcase code, in cooperation
+with the init process. testcase_main represents the entire testcase; when it
+returns, the testcase terminates. All of this handled automatically by the init
+code that I’ve provided in the Phase 1 Helper library; you don’t have to write
+anything, although you should find a process named "testcase_main" every
+time that you test your code.
+You must not add it in manually to the process table. Instead, expect that
+init will call spork() to create it. Thus, although this process will always
+exist, you don’t have to do anything to make that happen; treat it like any
+other process.
+
+(spec continues on the next page)
+4
+
+5 Bootstrap
+
+We “bootstrap” an operating system by initializing all of its memory (includ-
+ing but not limited to the process table) and then getting the first process(es)
+
+running. This is a complex process in the Real World, and in USLOSS there
+are some complexities, too.
+However, the Phase 1 Helper code has handled most of that for you. All you
+need to do is to implement the function phase1_init(). This function will run
+before any processes are created or switched to, and thus it must not block,
+nor may it call spork() to create any children. Instead, its purpose is simply
+to initialize memory.
+Your code should:
+
+ Wipe all of your global variables (including the process table) to some well-
+known state. I suggest using C’s memset() function for complex things
+
+(like the process table); I recommend that you set them all to 0, just so
+that you know what’s in every field.
+ Prepare the init process to run (including calling russ_ContextInit()
+to create its USLOSS_Context struct. However, you must not context
+switch to it.
+
+(spec continues on the next page)
+5
+
+6 Interrupts and Concurrency
+Beware concurrency issues!!! Any time that your code is running - even if
+it is running code that is definitely part of the kernel - it is possible that your
+function might be interrupted. In the kernel, this generally happens because of
+interrupts - an interrupt can fire at any time, while your code is running. This
+means that any operation - even things that seem simple - can be interrupted!
+For example, a simple line like
+x++;
+
+might break down, inside your CPU, into 3 (or more!) assembly language state-
+ments:
+
+LOAD reg[foo], x
+INCREMENT reg[foo]
+STORE x, reg[foo]
+
+What would happen if an interrupt occurred between the load and store oper-
+ations - might code in the interrupt handler modify the variable x without you
+
+noticing???
+For this reason, all functions you write in Phase 1 (except if one simply reads
+a simple state, such as getpid()) need to disable interrupts, and then restore
+them later. This will ensure that no other code can run; your program will have
+complete control over the CPU until you restore the interrupts.
+See the USLOSS documentation to see how to read and edit the PSR to
+disable and restore interrupts.
+NOTE:
+While all of the functions you write need to run with interrupts disabled, if
+you write helper functions it is peremissible for them to simply assume that
+interrupts are disabled - and not disable them again - so long as their callers
+always disable interrupts before calling the helper.
+6.1 Restore vs. Enable
+Notice that I said that, at the end of a function, you must restore interrupts,
+not enable them! This is because it is quite possible (likely, even!) that the
+code which calls one of your functions may have already disabled interrupts.
+For instance, perhaps an interrupt handler is running, and is trying to send
+a message; this might require waking up a process, and waking up a process
+requires updating fields in the process table.
+Therefore, when you disable interrupts at the top of your function, save the
+old PSR state, and make a point of restoring the PSR to exactly its previous
+value before you return.
+
+6
+
+7 Basic Process Rules
+7.1 Parent and Child Processes
+A process may create as many child processes as it likes, but of course each
+process will have exactly one parent. Unlike in UNIX, parent processes in our
+OS cannot end until all of their children have ended and the parent has collected
+all of their statuses (using join()).
+
+Your process table must include fields which allow you to track the par-
+ent/child relationships between the currently running (or recently terminated)
+
+processes.
+7.2 Process Table and PIDs
+
+You must implement an array, known as the “process table,” which stores infor-
+mation about all of the current and recently-run processes. You must define the
+
+struct which is used to store process information, and you can organize it how-
+ever you like; however, your process table must be an array of these structures,
+
+with exactly MAXPROC2
+elements.
+
+Each time that spork() is called, you will allocate another slot in this table,
+and use it to store information about the process (or return an error to the
+user). This slot must not be freed until the parent process has collected the
+ending status for the process with join(); however, once this status has been
+collected, you must re-use the slot for other, additional processes that might be
+created.
+Each process must be assigned a PID (process ID); this is a non-negative
+int. At all times, the PID, and the slot where the process is stored in the
+process table, MUST be linked as follows:
+int slot = pid % MAXPROC;
+
+This is critical because other code, in other Phases, may have their own ta-
+bles that parallel the process table, and they will use the calculation above to
+
+deteremine the slot they should use for each process’s data.3
+We do not define how you must assign PIDs, but simply assigning them
+sequentially is an easy strategy. However, because of the modulo rule above, be
+aware that sometimes you will need to skip over a PID in the sequence, since
+the process table entry where it normally would be assigned is still in use.4
+2phase1.h
+3
+In a real OS, where the various subcomponents of the OS are more tightly linked than
+our Phases, the other subcomponents would have their own fields in the process table struct,
+and thus the layout of the process table might be less restrictive.
+4For example, since init will never die and init has PID 1, this means that it will be
+impossible for any process to have PID 1+MAXPROC.
+
+7
+
+8 Priorities and the Dispatcher
+Each process is assigned a priority, which must be in the range 1-6 (inclusive).
+Lower numbers mean higher priority, and no process will run if a higher priority
+process is runnable. init must run at priority 6; for all other processes, the
+range is limited to 1-5 (inclusive).
+The dispatcher must treat priorities as absolute; that is, a process will never
+run if there is a runnable process with a more favored priority. For example,
+suppose that there are 3 processes with priority 4, which have been waiting for
+a very long time for the CPU; further suppose that there is a fourth process,
+with priority 2, which is also runnable. The priority 2 process will run forever
+- until it blocks or dies - entirely starving the priority 4 processes.
+
+Within a given priority level, dispatcher must implement round-robin schedul-
+ing, with an 80 millisecond quantum for time-slicing. This means that any time
+
+that a process becomes runnable (when it is created, or when it moves from
+blocked to runnable), it is added to the end of a queue, and will wait its turn
+behind other processes already in the queue.
+If a process runs for its full 80ms timeslice, it will be moved back to the
+rear of the queue, and another process will get a turn (assuming, of course, that
+there are any other runnable processes at the same priority).
+If a process becomes runnable and it has a higher priority than the currently
+running process, the dispatcher will immediately switch to it.
+8.1 Queues are Required
+You must implement a separate run-queue for each priority. You must not
+do a global search of all processes in the process table. You must not have
+blocked processes in any run-queue5 You must not mix processes with different
+priorities into a single run-queue.
+8.2 Context Switching
+An operating system kernel performs a “context switch” to change the CPU to
+
+make it ready to execute a different process than the one that is currently run-
+ning. This generally involves loading the CPU up with new registers (including
+
+things like the Instruction Pointer a.k.a. Program Counter) as well as setting
+up basic machine state variables (like the PSR in USLOSS).
+
+Usually (pay attention to the exceptions below!), a context switch also re-
+quires that we save the old state of the process. To implement this, the kernel
+
+must have some sort of data structure which keeps track of the state of a process
+while it is “switched out.”
+If implemented properly, a process can be switched out of the CPU, stored
+in memory for as long as we want, and then switched back into the CPU, and
+the code will never notice it (unless they are closely monitoring the clock). That
+5Do you want the current running process in a run-queue, or will you remove it? Your
+choice!
+
+8
+
+is, a context switch must restore the process to exactly the same state as it
+had before it was switched out.
+While conceptually simple, context switches are notoriously hard to actually
+implement. Therefore, you should use the ContextSwitch mechanism built in
+to USLOSS. You should store a USLOSS_Context variable in each process’s slot
+in the process table. Call USLOSS_ContextInit() to initialize this when a new
+process is created, and then use USLOSS_ContentSwitch() to switch from one
+context to another.
+8.2.1 When Is Saving Not Required?
+As noted above, there are exceptional situations where you do not need to save
+the current state when performing a context switch. For your code, the only one
+you need to worry about is quit(). When a process quits, it posts its status
+into the process table (and perhaps wakes up a few processes waiting for it),
+but then it simply ceases to run. In this case, there’s no need to ask USLOSS
+to save the current state, as you will never return to it.
+9 Kernel Mode
+The code in Phase 1 must only be called in kernel mode. Therefore, your code
+must check, at the top of each of the required functions, to confirm that the
+PSR shows that you are running in kernel mode.
+If any one of the required functions is called from user mode, print an error
+message and call USLOSS_Halt(1).
+Of course, if you implement any helper functions in Phase 1 (I recommend
+it!), it’s up to you whether or not to perform this cheeck; it is only required on
+the functions listed in this spec.
+
+(spec continues on the next page)
+9
+
+10 Detailed Function Specifications
+10.1 void dispatcher(void)
+May Context Switch: yes
+
+Examines the run queues, and decided which process should run next. Auto-
+matically performs a context switch to it. (If the current process should continue
+
+running, do not perform a context switch.)
+The dispatcher must make its decisions according to the following rules:
+
+ Priorities are absolute: never run a lower-priority process when a higher-
+priority is runnable.
+
+ If there is only one highest priority process (that is, there are none others
+that are the same priority, which are also runable), the the process will
+run forever, until the situation changes.
+ However, if there are multiple processes tied for highest priority, each
+should be allowed to run for 80 milliseconds, after which they will be
+moved to the back of the run queue, and other processes (of the same
+priority) will get a turn, round-robin fashion.
+This function must be called with interrupts disabled. And it must return
+with the interrupts in the same state.
+10.2 void phase1 init(void)
+May Block: n/a
+May Context Switch: n/a
+Initializes the data structures for Phase 1. This function may, if you wish,
+populate the proc table with the information for init, but it must not perform
+any context switch, so init will not run (yet).
+
+(spec continues on the next page)
+10
+
+10.3 int spork(char *name, int (*startFunc)(char*), char
+*arg, int stackSize, int priority)
+May Block: No
+May Context Switch: Yes
+Args:
+ name - Stored in process table, useful for debug. Must be no longer than
+MAXNAME6
+characters.
+
+ startFunc - The main() function for the child process.
+ arg - The argument to pass to startFunc(). May be NULL.
+ stackSize - The size of the stack, in bytes. Must be no less than USLOSS_MIN_STACK7
+.
+ priority - The priority of this process. Priority 6 is reserved for init, so
+the only valid values for this call are 1-5 (inclusive).
+Return Value:
+ -2 : stackSize is less than USLOSS_MIN_STACK
+ -1 : no empty slots in the process table, priority out of range, startFunc
+or name are NULL, name too long
+ > 0 : PID of child process
+Creates a child process of the current process. This function creates the entry
+in the process table and fills it in, and then calls the dispatcher; if the child is
+higher priority than the parent, then the child will run before spork() returns.
+When the child process runs, startFunc() will be called, and passed the
+parameter specified as arg. If startFunc() ever returns, this terminates the
+process; it has the same effect as if the process had called quit() (with the
+return value being the process status).
+The child process starts in kernel mode; it may switch itself into user mode if
+desired, but this must be done by the startFunc(); spork() is not responsible
+for doing it.
+spork() will allocate a stack, of stackSize bytes, for the process. It will
+do so using malloc(), which is not true to how a real OS works - but it’s a
+simplification we will use for this project.
+spork() must call Phase 1 Helper library to create a new context, using
+russ_ContextInit(). The Helper library will then call USLOSS_ContextInit(),
+6phase1.h
+7usloss.h
+
+11
+
+with slightly different parameters. (The Helper library automates some things
+which are kind of irritating about how USLOSS handles new-process creation.)
+
+Each process in the process table should have its own USLOSS_Context vari-
+able, to store the state of this process whenever it is blocked.
+
+Comments:
+ Should spork() put the new child at the head or the tail of the list of
+children? Either is permissible, but you will probably find it easier to
+match my output (and thus not require as many README entries) if you
+add the child at the head.
+And after all, adding a child at the head is O(1). Why would you do
+anything else, if you were given the choice???
+ In UNIX, the fork() syscall creates a duplicate of the current process,
+not a new process with its own main(). But to implement this requires
+some Virtual Memory trickery which is too complex for Phase 1, so we
+gave this function a different name - to make it clear that spork() does
+something different than fork().
+ Because creating a new process requires allocating memory for it, fork()
+in the Real World may block, while new memory pages are allocated;
+other, older pages might have to be swapped out to disk, discarded from
+the disk cache, etc.
+To simplify Phase 1, we are ignoring all that; your code will simply call
+malloc(). This is entirely unrealistic in the Real World, but it’s good
+enough for our project.
+
+(spec continues on the next page)
+12
+
+10.4 int join(int *status)
+May Block: Yes
+May Context Switch: Yes
+Args:
+ status - Out pointer. Must point to an int; join() will fill it with the
+status of the process joined-to.
+Return Value:
+ -3 : invalid arguments passed to the function (that is, the status pointer
+is NULL)
+ -2 : the process does not have any children (or, all children have already
+been joined)
+ > 0 : PID of the child joined-to
+Blocks the current process, until one of its children terminates. If a child has
+already died, then this will not block, and will return immediately; otherwise,
+it blocks until one of its children dies. The PID of the dead child is returned,
+and the status is stored through the status out-pointer.
+If multiple children have died before this call, or if multiple children die in
+rapid succession before this process can awake, then only one child status will
+be returned per call to join(). The status of other child(ren) will be saved,
+and will be available for later calls to join().
+The status returned, in the out-pointer, is always the same status as passed
+to quit().
+
+(spec continues on the next page)
+13
+
+10.5 void quit(int status)
+May Block: This function never returns
+May Context Switch: Always context switches, since the current process
+terminates.
+Args:
+ status - The exit status of this process. It will be returned to the parent
+(eventually) through join().
+Return Value: This function never returns
+Terminates the current process; it will never run again. The status for this
+process will be stored in the process table entry, for later collection by the
+parent process.
+If the parent’s process is already waiting in a join(), then this call will
+wake it up; the join() function will promptly return, delivering to the caller
+information about this newly-dead process, or perhaps a newly-dead sibling.
+If the parent’s process is not yet waiting in a join(), then this process table
+entry must continue to be in use until the parent collects the status from the
+process table entry.
+10.5.1 Freeing the Stack
+You must not free the stack memory in quit(), since you are still using it!
+Instead, you must free the stack memory in join(); when the parent process
+collects the status of the dead process, you should clean up the stack at that
+point.
+10.6 int getpid(void)
+May Block: No
+May Context Switch: No
+Args: None
+Return Value: PID of the current process
+Returns the PID of the current process.
+
+(spec continues on the next page)
+14
+
+10.7 void dumpProcesses(void)
+May Block: No
+May Context Switch: No
+Args: None
+Return Value: None
+Prints out process infromation from the process table, in a human-readable
+format. (Make it look nice, you’re going to be using it for debug.) The exact
+format and content are up to the student, however, it must include, for each
+process still in the process table (that is, processes that are alive, and those that
+have ended but their status has not been collected yet), the following fields:
+ Name
+ PID
+ Parent PID
+ Priority
+ Runnable status - 0=runnable, > 0 =blocked. See blockMe() below.
+Remember: This is the minimum! I urge you to add more fields - as many
+as help you debug. And you may also find it useful to look at old (freed) process
+table entries, in addition to the live ones.
+
+(spec continues on the next page)
+15
+
+10.8 void blockMe(int newStatus)
+May Block: Must block
+May Context Switch: Must block
+Args:
+ newStatus - The reason for blocking the process
+Return Value: None
+Used heavily by the other Phases to block processes for a wide variety of reasons.
+The newStatus describes why the process is blocked; in this call, it must be
+greater than 10. (Print an error message, and halt USLOSS if it is not.)
+Record the status in the process table entry for this process; once this is
+nonzero, the dispatcher should never allow the process to run (until the process
+is unblocked, of course!).
+Call the dispatcher, to cause the OS to switch to some other process.
+blockMe() never returns until some other process has called unblockProc()
+for the process.
+10.9 int unblockProc(int pid)
+May Block: No
+May Context Switch: Yes
+Args:
+ pid - The process to unblock
+Return Value:
+ -2 : the indicated process was not blocked, does not exist, or is blocked
+on a status ≤ 10.
+ 0 : otherwise
+Unblocks a process that was previously blocked with blockMe(). Note that,
+while blockMe() always blocks the current process, unblockProc() must of
+course be called by a different process.
+The new process is placed on the appropriate run queue (according to its
+priority). It is always placed at the end of the queue, after any already-queued
+processes.
+
+16
+
+unblockProc() must call the dispatcher just before it returns, in case the
+newly-awoken process is higher priority than the currently running process.
+Thus, like spork(), this function will never block, but it might context switch
+to another process temporarily.
+
+(spec continues on the next page)
+17
+
+11 Tip: Linked Lists and Trees Without malloc()
+
+The spec says that you must not allocate memory with malloc() in this simu-
+lation, except for the stack allocation in spork(). And yet, you are required to
+
+build various process queues (such as run-queues queues) as well as trees (where
+a parent can have many children). How do we make this work?
+The first trick is to include the next fields in your process structures:
+struct Example {
+struct Example *run_queue_next;
+struct Example *first_child;
+struct Example *next_sibling;
+};
+void some_func(...)
+{
+struct Example *process_before = ...
+struct Example *process_after = ...
+process_before->run_queue_next = process_after;
+}
+To build a tree, where each parent can have an arbitrary number of children,
+the trick is to have only a pointer to the first child in the parent; then we will
+build a linked list of the siblings from there:
+void build_parent_child_tree(...)
+{
+struct Example *parent = ...
+struct Example * first_child = ...
+struct Example *second_child = ...
+struct Example * third_child = ...
+parent ->first_child = first_child;
+first_child ->next_sibling = second_child;
+second_child->next_sibling = third_child;
+third_child ->next_sibling = NULL;
+}
+
+(spec continues on the next page)
+18
+
+12 Turning in Your Solution
+You must turn in your code using GradeScope. While the autograder cannot
+actually assign you a grade (because we don’t expect you to match the “correct”
+output with perfect accuracy), it will allow you to compare your output, to the
+expected output. Use this report to see if you are missing features, crashing
+when you should be running, etc.
+12.1 README File
+Since OSes are complex systems, it is sometimes impractical to exactly match
+the exact output from a testcase. This is especially true because I gave you a
+moderate amount of freedom about how to implement your data structures and
+algorithms.
+While it is critical that you implement the requirements that I have given
+you, you have freedom about details. If your code matches the requirements
+but has different output in some minor detail, you may submit a README file,
+which explains to your TA why you think it still follows the spec. If your TA
+agrees, they will give you back the points that you lost from the testcase.
+For each testcase that you would like points back for, your README file
+must:
+ Give the testcase number
+ Explain, as precisely as you can, why the difference doesn’t matter.
+Do not simply say, “My code works correctly” - give an argument
+
+ChatGPT
